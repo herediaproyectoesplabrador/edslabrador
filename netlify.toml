@@ -1,5 +1,9 @@
 [build]
   publish = "."
+  edge_functions = "netlify/edge-functions"
+
+[functions]
+  directory = "netlify/functions"
 
 [[redirects]]
   from = "/"
@@ -12,3 +16,29 @@
   to = "/jbc/estacion-servicio-labrador/"
   status = 302
   force = true
+
+[[redirects]]
+  from = "/netlify/*"
+  to = "/acceso.html"
+  status = 404
+  force = true
+
+[[edge_functions]]
+  path = "/jbc/estacion-servicio-labrador"
+  function = "project-gate"
+
+[[edge_functions]]
+  path = "/jbc/estacion-servicio-labrador/*"
+  function = "project-gate"
+
+[[edge_functions]]
+  path = "/pointclouds/jbc/estacion-servicio-labrador/*"
+  function = "project-gate"
+
+[[edge_functions]]
+  path = "/models/jbc/estacion-servicio-labrador/*"
+  function = "project-gate"
+
+[[edge_functions]]
+  path = "/sources/jbc/estacion-servicio-labrador/*"
+  function = "project-gate"

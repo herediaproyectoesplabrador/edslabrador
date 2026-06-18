@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Acceso | EDS Labrador</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #eef3f1;
+      --panel: #ffffff;
+      --text: #13231f;
+      --muted: #5f706b;
+      --accent: #087a6d;
+      --accent-dark: #066156;
+      --danger: #a22929;
+      --border: #cbd8d4;
+      --shadow: 0 20px 60px rgba(18, 35, 31, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background:
+        linear-gradient(135deg, rgba(8, 122, 109, 0.12), transparent 42%),
+        linear-gradient(315deg, rgba(24, 54, 49, 0.1), transparent 38%),
+        var(--bg);
+    }
+
+    main {
+      width: min(100%, 420px);
+      padding: 32px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 1.5rem;
+      line-height: 1.2;
+    }
+
+    p {
+      margin: 0 0 24px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      min-height: 48px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font: inherit;
+      color: var(--text);
+      background: #fff;
+    }
+
+    input:focus {
+      outline: 3px solid rgba(8, 122, 109, 0.22);
+      border-color: var(--accent);
+    }
+
+    button {
+      width: 100%;
+      min-height: 48px;
+      margin-top: 16px;
+      border: 0;
+      border-radius: 6px;
+      font: inherit;
+      font-weight: 700;
+      color: #fff;
+      background: var(--accent);
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: var(--accent-dark);
+    }
+
+    button:disabled {
+      cursor: wait;
+      opacity: 0.68;
+    }
+
+    .message {
+      min-height: 22px;
+      margin-top: 14px;
+      margin-bottom: 0;
+      color: var(--danger);
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Acceso al proyecto</h1>
+    <p>Ingrese el codigo autorizado para abrir EDS Labrador.</p>
+    <form id="accessForm" method="post" action="/.netlify/functions/project-auth" autocomplete="off">
+      <input type="hidden" id="nextInput" name="next" value="/jbc/estacion-servicio-labrador/">
+      <label for="codeInput">Codigo de acceso</label>
+      <input id="codeInput" name="code" type="password" inputmode="text" autocomplete="one-time-code" required autofocus>
+      <button type="submit">Abrir proyecto</button>
+      <p class="message" id="message" role="alert" aria-live="polite"></p>
+    </form>
+  </main>
+
+  <script>
+    const form = document.getElementById("accessForm");
+    const codeInput = document.getElementById("codeInput");
+    const nextInput = document.getElementById("nextInput");
+    const message = document.getElementById("message");
+    const button = form.querySelector("button");
+    const params = new URLSearchParams(window.location.search);
+    const requestedNext = params.get("next");
+
+    if (requestedNext && requestedNext.startsWith("/") && !requestedNext.startsWith("//")) {
+      nextInput.value = requestedNext;
+    }
+
+    if (params.get("error") === "1") {
+      message.textContent = "Codigo incorrecto.";
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      message.textContent = "";
+      button.disabled = true;
+
+      try {
+        const response = await fetch(form.action, {
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            code: codeInput.value,
+            next: nextInput.value
+          })
+        });
+
+        const result = await response.json().catch(() => ({}));
+
+        if (response.ok && result.redirect) {
+          window.location.replace(result.redirect);
+          return;
+        }
+
+        message.textContent = result.message || "No se pudo validar el codigo.";
+        codeInput.select();
+      } catch (error) {
+        message.textContent = "No se pudo conectar con el servidor.";
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
