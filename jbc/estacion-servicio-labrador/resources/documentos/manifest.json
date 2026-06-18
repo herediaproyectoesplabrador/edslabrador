@@ -6,6 +6,34 @@
 			"file": "ESTACION DE SERVICIO LABRADOR.pdf",
 			"format": "PDF",
 			"date": "2026-06-16"
+		},
+		{
+			"title": "Lamina 1",
+			"type": "technical-document",
+			"file": "LAMINA 1_F.pdf",
+			"format": "PDF",
+			"date": "2026-06-18"
+		},
+		{
+			"title": "Lamina 2",
+			"type": "technical-document",
+			"file": "LAMINA 2_F.pdf",
+			"format": "PDF",
+			"date": "2026-06-18"
+		},
+		{
+			"title": "Lamina 3",
+			"type": "technical-document",
+			"file": "LAMINA 3_F.pdf",
+			"format": "PDF",
+			"date": "2026-06-18"
+		},
+		{
+			"title": "Laminas y levantamiento",
+			"type": "technical-document",
+			"file": "L\u00c1MIINAS Y LEVANTAMIENTO.dwg",
+			"format": "DWG",
+			"date": "2026-06-18"
 		}
 	]
 }

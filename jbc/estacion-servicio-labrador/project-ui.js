@@ -303,6 +303,43 @@
 		return value.trim().toLowerCase();
 	}
 
+	function loadGalleryImage(image) {
+		if (!image || image.dataset.loaded === "true") return;
+
+		const src = image.dataset.src;
+		if (!src) return;
+
+		image.src = src;
+		image.dataset.loaded = "true";
+		image.removeAttribute("data-src");
+	}
+
+	function observeGalleryImages(container) {
+		const images = Array.from(container.querySelectorAll("img[data-src]"));
+		if (images.length === 0) return null;
+
+		if (!("IntersectionObserver" in window)) {
+			images.forEach(loadGalleryImage);
+			return null;
+		}
+
+		const observer = new IntersectionObserver((entries) => {
+			for (const entry of entries) {
+				if (!entry.isIntersecting) continue;
+
+				const image = entry.target;
+				loadGalleryImage(image);
+				observer.unobserve(image);
+			}
+		}, {
+			rootMargin: "240px 0px",
+			threshold: 0.01
+		});
+
+		images.forEach(image => observer.observe(image));
+		return observer;
+	}
+
 	function renderImageCard(item, group, manifestUrl, index) {
 		const article = document.createElement("article");
 		article.className = "gallery-card";
@@ -316,9 +353,10 @@
 		button.setAttribute("aria-label", `Abrir ${item.title || item.number || "imagen"}`);
 
 		const image = document.createElement("img");
-		image.src = resolveResourceUrl(manifestUrl, item.file);
+		image.dataset.src = resolveResourceUrl(manifestUrl, item.file);
 		image.alt = item.title || `Imagen ${item.number || ""}`;
 		image.loading = "lazy";
+		image.decoding = "async";
 
 		const body = document.createElement("div");
 		body.className = "gallery-card-body";
@@ -418,6 +456,7 @@
 		let galleryItems = [];
 		let visibleIndexes = [];
 		let activeVisibleIndex = 0;
+		let lazyImageObserver = null;
 		const zoomState = {
 			scale: 1,
 			minScale: 1,
@@ -613,6 +652,9 @@
 				} else {
 					droneGallery.replaceChildren(...drone.map((item, index) => renderImageCard(item, "drone", manifestUrl, panoramics.length + index)));
 				}
+
+				if (lazyImageObserver) lazyImageObserver.disconnect();
+				lazyImageObserver = observeGalleryImages(document);
 
 				document.querySelectorAll(".gallery-card-button").forEach(button => {
 					button.addEventListener("click", () => {
