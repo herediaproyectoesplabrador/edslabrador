@@ -496,9 +496,9 @@ p {
 
 .gallery-tools {
 	display: grid;
-	grid-template-columns: minmax(240px, 420px) auto;
+	grid-template-columns: minmax(240px, 360px) minmax(0, 1fr);
 	gap: 14px;
-	align-items: end;
+	align-items: start;
 	margin-bottom: 22px;
 }
 
@@ -529,10 +529,71 @@ p {
 }
 
 .gallery-readout {
-	padding-bottom: 10px;
+	min-height: 22px;
 	color: var(--muted);
 	font-size: 13px;
 	font-weight: 800;
+}
+
+.gallery-tool-panel {
+	display: grid;
+	gap: 10px;
+}
+
+.gallery-download-actions {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.gallery-tool-button,
+.layer-download-button {
+	min-height: 38px;
+	padding: 0 12px;
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	background: var(--white);
+	color: var(--ink);
+	font-size: 13px;
+	font-weight: 850;
+	cursor: pointer;
+}
+
+.gallery-tool-button.primary {
+	border-color: rgba(45, 178, 119, 0.65);
+	background: var(--jbc-green-dark);
+	color: var(--white);
+}
+
+.gallery-tool-button:hover,
+.layer-download-button:hover {
+	border-color: rgba(45, 178, 119, 0.65);
+	color: var(--jbc-green-dark);
+}
+
+.gallery-tool-button.primary:hover {
+	color: var(--white);
+	background: #258f63;
+}
+
+.gallery-tool-button:disabled,
+.layer-download-button:disabled {
+	cursor: not-allowed;
+	opacity: 0.55;
+}
+
+.download-status {
+	min-height: 19px;
+	margin: 0;
+	color: var(--muted);
+	font-size: 12px;
+	font-weight: 760;
+	line-height: 1.35;
+}
+
+.download-status.compact {
+	margin-top: 8px;
 }
 
 .gallery-grid {
@@ -597,6 +658,25 @@ p {
 	color: var(--muted);
 	font-size: 13px;
 	line-height: 1.35;
+}
+
+.gallery-select {
+	min-height: 40px;
+	padding: 0 12px 12px;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--navy);
+	font-size: 13px;
+	font-weight: 800;
+	cursor: pointer;
+}
+
+.gallery-select input {
+	width: 18px;
+	height: 18px;
+	margin: 0;
+	accent-color: var(--jbc-green-dark);
 }
 
 .gallery-carousel-open {
@@ -925,6 +1005,25 @@ p {
 	display: inline-block;
 }
 
+.layer-downloads {
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid var(--line);
+}
+
+.layer-downloads .layer-panel-title {
+	margin-bottom: 8px;
+}
+
+.layer-download-button {
+	width: 100%;
+	background: var(--white);
+}
+
+.layer-download-button + .layer-download-button {
+	margin-top: 8px;
+}
+
 .layer-loader::before,
 .layer-loader::after {
 	content: "";
@@ -1031,6 +1130,10 @@ p {
 	font-size: 14px;
 	font-weight: 800;
 	cursor: pointer;
+}
+
+.raster-download-button {
+	text-decoration: none;
 }
 
 .zoom-button:hover {

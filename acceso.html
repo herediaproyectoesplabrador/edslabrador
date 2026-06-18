@@ -46,6 +46,14 @@
       box-shadow: var(--shadow);
     }
 
+    .access-logo {
+      width: 142px;
+      height: auto;
+      display: block;
+      margin: 0 0 22px;
+      object-fit: contain;
+    }
+
     h1 {
       margin: 0 0 8px;
       font-size: 1.5rem;
@@ -113,6 +121,7 @@
 </head>
 <body>
   <main>
+    <img class="access-logo" src="/jbc/estacion-servicio-labrador/assets/logo-jbc.jpg" alt="JBC Topografia">
     <h1>Acceso al proyecto</h1>
     <p>Ingrese el codigo autorizado para abrir EDS Labrador.</p>
     <form id="accessForm" method="post" action="/.netlify/functions/project-auth" autocomplete="off">

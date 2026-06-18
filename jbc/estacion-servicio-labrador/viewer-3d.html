@@ -73,6 +73,12 @@
 				</span>
 			</span>
 		</label>
+		<div class="layer-downloads" aria-label="Descargas del visor">
+			<p class="layer-panel-title">Descargas</p>
+			<button id="downloadTexturedModel" class="layer-download-button" type="button">Modelo texturizado</button>
+			<button id="downloadSourceLas" class="layer-download-button" type="button">Nube LAS</button>
+			<p id="viewerDownloadStatus" class="download-status compact" aria-live="polite"></p>
+		</div>
 	</aside>
 
 	<script src="project-ui.js"></script>
@@ -152,6 +158,10 @@
 		];
 
 		const texturedBlocks = ["Block_0", "Block_1"];
+		const sourceLasDownloads = [
+			{url: "../../sources/jbc/estacion-servicio-labrador/las/Block_0.las", fileName: "Block_0.las"},
+			{url: "../../sources/jbc/estacion-servicio-labrador/las/Block_1.las", fileName: "Block_1.las"}
+		];
 
 		function formatCount(count, singular, plural) {
 			return `${count} ${count === 1 ? singular : plural}`;
@@ -398,7 +408,57 @@
 			}
 		}
 
+		async function collectTexturedModelDownloads() {
+			const files = [];
+
+			for (const name of texturedBlocks) {
+				const baseUrl = `../../models/jbc/estacion-servicio-labrador/obj/${name}/`;
+				files.push(
+					{url: `${baseUrl}${name}.obj`, fileName: `${name}.obj`},
+					{url: `${baseUrl}${name}.mtl`, fileName: `${name}.mtl`}
+				);
+
+				try {
+					const textureNames = await loadMtlTextures(baseUrl, `${name}.mtl`);
+					for (const textureName of new Set(textureNames.values())) {
+						files.push({url: `${baseUrl}${textureName}`, fileName: textureName});
+					}
+				} catch (error) {
+					console.error(error);
+				}
+			}
+
+			return files;
+		}
+
+		function wireDownloadControls() {
+			const modelButton = document.getElementById("downloadTexturedModel");
+			const lasButton = document.getElementById("downloadSourceLas");
+			const status = document.getElementById("viewerDownloadStatus");
+
+			modelButton.addEventListener("click", async () => {
+				modelButton.disabled = true;
+				status.textContent = "Preparando modelo...";
+				const files = await collectTexturedModelDownloads();
+				window.JBCProjectUI.downloadFiles(files, {
+					statusElement: status,
+					confirmThreshold: 6,
+					label: "archivos del modelo"
+				});
+				modelButton.disabled = false;
+			});
+
+			lasButton.addEventListener("click", () => {
+				window.JBCProjectUI.downloadFiles(sourceLasDownloads, {
+					statusElement: status,
+					confirmThreshold: 1,
+					label: "archivos LAS"
+				});
+			});
+		}
+
 		wireLayerControls();
+		wireDownloadControls();
 		loadPointclouds();
 	</script>
 </body>

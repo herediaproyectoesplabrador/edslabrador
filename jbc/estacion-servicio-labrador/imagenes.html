@@ -44,7 +44,17 @@
 					<span>Buscar por numero</span>
 					<input id="imageSearch" type="search" inputmode="numeric" placeholder="Ej. 001, 24, PANO-03">
 				</label>
-				<div id="galleryReadout" class="gallery-readout" aria-live="polite">0 resultados</div>
+				<div class="gallery-tool-panel">
+					<div id="galleryReadout" class="gallery-readout" aria-live="polite">0 resultados</div>
+					<div class="gallery-download-actions" aria-label="Descargar imagenes">
+						<button id="selectVisibleImages" class="gallery-tool-button" type="button">Seleccionar visibles</button>
+						<button id="clearSelectedImages" class="gallery-tool-button" type="button">Limpiar</button>
+						<button id="downloadSelectedImages" class="gallery-tool-button primary" type="button" disabled>Descargar seleccionadas</button>
+						<button id="downloadVisibleImages" class="gallery-tool-button" type="button">Descargar visibles</button>
+						<button id="downloadAllImages" class="gallery-tool-button" type="button">Descargar todas</button>
+					</div>
+					<p id="imageDownloadStatus" class="download-status" aria-live="polite"></p>
+				</div>
 			</section>
 
 			<section class="resource-section" aria-labelledby="panoramic-title">

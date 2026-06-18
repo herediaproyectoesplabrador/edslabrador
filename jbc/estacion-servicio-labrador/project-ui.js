@@ -177,6 +177,70 @@
 		return new URL(file, new URL(manifestUrl, window.location.href)).href;
 	}
 
+	function fileNameFromUrl(url) {
+		const pathname = new URL(url, window.location.href).pathname;
+		const name = pathname.split("/").filter(Boolean).pop();
+		return decodeURIComponent(name || "descarga");
+	}
+
+	function normalizeDownloadItem(item) {
+		if (!item) return null;
+
+		if (typeof item === "string") {
+			const href = new URL(item, window.location.href).href;
+			return {href, fileName: fileNameFromUrl(href)};
+		}
+
+		const href = new URL(item.url || item.href || item.file, window.location.href).href;
+		return {
+			href,
+			fileName: item.fileName || item.name || fileNameFromUrl(href)
+		};
+	}
+
+	function downloadFiles(files, options = {}) {
+		const items = files.map(normalizeDownloadItem).filter(Boolean);
+		const delay = options.delay ?? 260;
+		const confirmThreshold = options.confirmThreshold ?? 24;
+		const label = options.label || "archivos";
+		const statusElement = options.statusElement || null;
+
+		if (items.length === 0) {
+			if (statusElement) statusElement.textContent = "No hay archivos para descargar.";
+			return false;
+		}
+
+		if (items.length > confirmThreshold) {
+			const ok = window.confirm(`Se iniciara la descarga de ${items.length} ${label}. El navegador puede pedir permiso para descargas multiples.`);
+			if (!ok) {
+				if (statusElement) statusElement.textContent = "Descarga cancelada.";
+				return false;
+			}
+		}
+
+		if (statusElement) {
+			statusElement.textContent = `Iniciando ${items.length} ${items.length === 1 ? "descarga" : "descargas"}...`;
+		}
+
+		items.forEach((item, index) => {
+			window.setTimeout(() => {
+				const link = document.createElement("a");
+				link.href = item.href;
+				link.download = item.fileName;
+				link.rel = "noopener";
+				document.body.appendChild(link);
+				link.click();
+				link.remove();
+
+				if (statusElement && index === items.length - 1) {
+					statusElement.textContent = `Descarga solicitada: ${items.length} ${items.length === 1 ? "archivo" : "archivos"}.`;
+				}
+			}, index * delay);
+		});
+
+		return true;
+	}
+
 	function renderDocumentCard(documentItem, manifestUrl) {
 		const article = document.createElement("article");
 		article.className = "document-card";
@@ -267,7 +331,20 @@
 
 		body.append(number, title);
 		button.append(image, body);
-		article.append(button);
+
+		const selectLabel = document.createElement("label");
+		selectLabel.className = "gallery-select";
+
+		const checkbox = document.createElement("input");
+		checkbox.type = "checkbox";
+		checkbox.dataset.gallerySelect = String(index);
+		checkbox.setAttribute("aria-label", `Seleccionar ${item.title || item.number || "imagen"}`);
+
+		const selectText = document.createElement("span");
+		selectText.textContent = "Seleccionar";
+
+		selectLabel.append(checkbox, selectText);
+		article.append(button, selectLabel);
 		return article;
 	}
 
@@ -329,6 +406,12 @@
 		const droneGallery = document.getElementById("droneGallery");
 		const panoramicCount = document.getElementById("panoramicCount");
 		const droneCount = document.getElementById("droneCount");
+		const selectVisibleButton = document.getElementById("selectVisibleImages");
+		const clearSelectedButton = document.getElementById("clearSelectedImages");
+		const downloadSelectedButton = document.getElementById("downloadSelectedImages");
+		const downloadVisibleButton = document.getElementById("downloadVisibleImages");
+		const downloadAllButton = document.getElementById("downloadAllImages");
+		const downloadStatus = document.getElementById("imageDownloadStatus");
 		if (!searchInput || !readout || !imageCount || !panoramicGallery || !droneGallery) return;
 
 		const carousel = createGalleryCarousel();
@@ -355,6 +438,42 @@
 				.filter(card => !card.hidden)
 				.map(card => Number(card.dataset.galleryIndex))
 				.filter(Number.isFinite);
+		}
+
+		function getSelectedIndexes() {
+			return Array.from(document.querySelectorAll("[data-gallery-select]:checked"))
+				.map(input => Number(input.dataset.gallerySelect))
+				.filter(Number.isFinite);
+		}
+
+		function filesFromIndexes(indexes) {
+			return indexes
+				.map(index => galleryItems[index])
+				.filter(Boolean)
+				.map(item => ({
+					url: item.url,
+					fileName: item.fileName || fileNameFromUrl(item.url)
+				}));
+		}
+
+		function updateSelectionControls() {
+			const selectedCount = getSelectedIndexes().length;
+			const visibleCount = getVisibleIndexes().length;
+
+			if (downloadSelectedButton) {
+				downloadSelectedButton.disabled = selectedCount === 0;
+				downloadSelectedButton.textContent = selectedCount === 0
+					? "Descargar seleccionadas"
+					: `Descargar seleccionadas (${selectedCount})`;
+			}
+
+			if (downloadVisibleButton) {
+				downloadVisibleButton.disabled = visibleCount === 0;
+			}
+
+			if (selectVisibleButton) {
+				selectVisibleButton.disabled = visibleCount === 0;
+			}
 		}
 
 		function constrainPan() {
@@ -461,6 +580,7 @@
 			}
 
 			readout.textContent = formatCount(visible, "resultado", "resultados");
+			updateSelectionControls();
 		}
 
 		fetchManifest(manifestUrl)
@@ -500,6 +620,58 @@
 						openCarousel(Number(card.dataset.galleryIndex));
 					});
 				});
+
+				document.querySelectorAll("[data-gallery-select]").forEach(input => {
+					input.addEventListener("change", updateSelectionControls);
+				});
+
+				if (selectVisibleButton) {
+					selectVisibleButton.addEventListener("click", () => {
+						const visible = new Set(getVisibleIndexes());
+						document.querySelectorAll("[data-gallery-select]").forEach(input => {
+							input.checked = visible.has(Number(input.dataset.gallerySelect));
+						});
+						if (downloadStatus) downloadStatus.textContent = `${visible.size} imagenes seleccionadas.`;
+						updateSelectionControls();
+					});
+				}
+
+				if (clearSelectedButton) {
+					clearSelectedButton.addEventListener("click", () => {
+						document.querySelectorAll("[data-gallery-select]").forEach(input => {
+							input.checked = false;
+						});
+						if (downloadStatus) downloadStatus.textContent = "Seleccion limpia.";
+						updateSelectionControls();
+					});
+				}
+
+				if (downloadSelectedButton) {
+					downloadSelectedButton.addEventListener("click", () => {
+						downloadFiles(filesFromIndexes(getSelectedIndexes()), {
+							statusElement: downloadStatus,
+							label: "imagenes seleccionadas"
+						});
+					});
+				}
+
+				if (downloadVisibleButton) {
+					downloadVisibleButton.addEventListener("click", () => {
+						downloadFiles(filesFromIndexes(getVisibleIndexes()), {
+							statusElement: downloadStatus,
+							label: "imagenes visibles"
+						});
+					});
+				}
+
+				if (downloadAllButton) {
+					downloadAllButton.addEventListener("click", () => {
+						downloadFiles(filesFromIndexes(galleryItems.map((_, index) => index)), {
+							statusElement: downloadStatus,
+							label: "imagenes"
+						});
+					});
+				}
 
 				searchInput.addEventListener("input", applySearch);
 				carousel.close.addEventListener("click", closeCarousel);
@@ -572,6 +744,7 @@
 	document.addEventListener("DOMContentLoaded", syncNavbarHeight);
 
 	window.JBCProjectUI = {
+		downloadFiles,
 		initRasterViewer,
 		initPublishedDocuments,
 		initPublishedImageGallery

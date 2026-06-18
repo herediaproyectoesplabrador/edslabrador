@@ -1,4 +1,7 @@
 const COOKIE_NAME = "labrador_access";
+const PUBLIC_PATHS = new Set([
+  "/jbc/estacion-servicio-labrador/assets/logo-jbc.jpg"
+]);
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
@@ -119,11 +122,16 @@ async function hasValidSession(request) {
 }
 
 export default async function projectGate(request) {
+  const requestUrl = new URL(request.url);
+
+  if (PUBLIC_PATHS.has(requestUrl.pathname)) {
+    return;
+  }
+
   if (await hasValidSession(request)) {
     return;
   }
 
-  const requestUrl = new URL(request.url);
   const accessUrl = new URL("/acceso.html", request.url);
   accessUrl.searchParams.set("next", `${requestUrl.pathname}${requestUrl.search}`);
 
