@@ -1,0 +1,54 @@
+
+> potree@1.8.0 start
+> gulp watch
+
+[[90m09:50:45[39m] Using gulpfile ~\OneDrive - JBC Topografia\Escritorio\potree-develop\potree-develop\gulpfile.js
+[[90m09:50:45[39m] Starting 'watch'...
+[[90m09:50:45[39m] Starting 'build'...
+[[90m09:50:45[39m] Starting 'pack'...
+[[90m09:50:45[39m] Starting 'webserver'...
+[[90m09:50:45[39m] Starting '<anonymous>'...
+[[90m09:50:45[39m] Starting '<anonymous>'...
+[[90m09:50:45[39m] Starting 'workers'...
+[[90m09:50:45[39m] Starting 'lazylibs'...
+[[90m09:50:45[39m] Starting 'shaders'...
+[[90m09:50:45[39m] Starting 'icons_viewer'...
+[[90m09:50:45[39m] Starting 'examples_page'...
+[[90m09:50:45[39m] [32mStarting server...[39m
+[[90m09:50:45[39m] Finished 'workers' after 52 ms
+[[90m09:50:45[39m] Finished 'lazylibs' after 56 ms
+[[90m09:50:45[39m] Finished 'pack' after 114 ms
+[[90m09:50:45[39m] Finished '<anonymous>' after 113 ms
+[[90m09:50:45[39m] Finished '<anonymous>' after 91 ms
+[[90m09:50:45[39m] Finished 'webserver' after 114 ms
+[[90m09:50:45[39m] Finished 'icons_viewer' after 61 ms
+[[90m09:50:45[39m] [32mServer started http://localhost:1234[39m
+[[90m09:50:45[39m] [32mRunning server[39m
+created resources/icons/index.html
+[[90m09:50:45[39m] Finished 'examples_page' after 157 ms
+(node:27924) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+created examples/github.html
+created examples/page.html
+[[90m09:50:48[39m] Finished 'shaders' after 2.98 s
+[[90m09:50:48[39m] Starting '<anonymous>'...
+[[90m09:50:48[39m] Finished '<anonymous>' after 5.68 ms
+[[90m09:50:48[39m] Finished 'build' after 3.04 s
+[[90m09:50:48[39m] Finished 'watch' after 3.04 s
+
+[36m
+[1msrc/Potree.js[22m → [1mbuild/potree/potree.js[22m...[39m
+[33m[1m(!)[22m[39m [33m[1mCircular dependencies[22m[39m
+src\utils.js -> src\utils\Profile.js -> src\utils.js
+src\utils.js -> src\utils\Measure.js -> src\utils.js
+[32mcreated [1mbuild/potree/potree.js[22m in [1m4.9s[22m[39m
+[36m
+[1msrc/workers/BinaryDecoderWorker.js[22m → [1mbuild/potree/workers/BinaryDecoderWorker.js[22m...[39m
+[32mcreated [1mbuild/potree/workers/BinaryDecoderWorker.js[22m in [1m91ms[22m[39m
+[36m
+[1msrc/modules/loader/2.0/DecoderWorker.js[22m → [1mbuild/potree/workers/2.0/DecoderWorker.js[22m...[39m
+[32mcreated [1mbuild/potree/workers/2.0/DecoderWorker.js[22m in [1m48ms[22m[39m
+[36m
+[1msrc/modules/loader/2.0/DecoderWorker_brotli.js[22m → [1mbuild/potree/workers/2.0/DecoderWorker_brotli.js[22m...[39m
+[32mcreated [1mbuild/potree/workers/2.0/DecoderWorker_brotli.js[22m in [1m295ms[22m[39m
+

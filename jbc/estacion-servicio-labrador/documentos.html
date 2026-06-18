@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Documentos | Estacion de Servicio Labrador</title>
+	<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+	<div class="site-shell">
+		<header class="project-navbar">
+			<a class="project-brand" href="index.html" aria-label="JBC Topografia">
+				<img src="assets/logo-jbc.jpg" alt="JBC Topografia">
+				<span>JBC Topografia</span>
+			</a>
+			<div class="project-title" aria-label="Proyecto">
+				<span>Proyecto:</span>
+				<span>Estacion de Servicio Labrador</span>
+			</div>
+			<nav class="project-nav" aria-label="Visualizaciones">
+				<a href="index.html">Inicio</a>
+				<a href="viewer-3d.html">Visor 3D</a>
+				<a href="dom.html">Ortofoto</a>
+				<a href="dsm.html">MDS</a>
+				<a href="documentos.html" aria-current="page">Documentos</a>
+				<a href="imagenes.html">Imagenes</a>
+			</nav>
+		</header>
+
+		<main class="resource-main">
+			<section class="resource-header" aria-labelledby="documents-title">
+				<div>
+					<p class="eyebrow">Control documental</p>
+					<h1 id="documents-title">Documentos del resultado fotogrametrico</h1>
+				</div>
+				<div class="resource-summary" aria-label="Resumen de documentos">
+					<strong id="documentCount">0</strong>
+					<span>documentos publicados</span>
+				</div>
+			</section>
+
+			<section class="resource-section" aria-labelledby="quality-report-title">
+				<div class="section-heading">
+					<div>
+						<h2 id="quality-report-title">Reporte de calidad</h2>
+						<p>Resultado fotogrametrico</p>
+					</div>
+				</div>
+				<div id="qualityReportList" class="document-grid" aria-live="polite"></div>
+			</section>
+
+			<section class="resource-section" aria-labelledby="document-list-title">
+				<div class="section-heading">
+					<div>
+						<h2 id="document-list-title">Documentos tecnicos</h2>
+						<p>Archivos publicados en la carpeta de recursos</p>
+					</div>
+				</div>
+				<div id="documentList" class="document-grid" aria-live="polite"></div>
+			</section>
+		</main>
+
+		<footer class="footer">
+			<div class="footer-inner">
+				<span>JBC Topografia, Catastro y Avaluos</span>
+				<span>Tel/WhatsApp (+506) 8437-4681</span>
+			</div>
+		</footer>
+	</div>
+
+	<script src="project-ui.js"></script>
+	<script>
+		window.JBCProjectUI.initPublishedDocuments({
+			manifestUrl: "resources/documentos/manifest.json"
+		});
+	</script>
+</body>
+</html>

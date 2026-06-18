@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Imagenes | Estacion de Servicio Labrador</title>
+	<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+	<div class="site-shell">
+		<header class="project-navbar">
+			<a class="project-brand" href="index.html" aria-label="JBC Topografia">
+				<img src="assets/logo-jbc.jpg" alt="JBC Topografia">
+				<span>JBC Topografia</span>
+			</a>
+			<div class="project-title" aria-label="Proyecto">
+				<span>Proyecto:</span>
+				<span>Estacion de Servicio Labrador</span>
+			</div>
+			<nav class="project-nav" aria-label="Visualizaciones">
+				<a href="index.html">Inicio</a>
+				<a href="viewer-3d.html">Visor 3D</a>
+				<a href="dom.html">Ortofoto</a>
+				<a href="dsm.html">MDS</a>
+				<a href="documentos.html">Documentos</a>
+				<a href="imagenes.html" aria-current="page">Imagenes</a>
+			</nav>
+		</header>
+
+		<main class="resource-main">
+			<section class="resource-header" aria-labelledby="images-title">
+				<div>
+					<p class="eyebrow">Registro fotografico</p>
+					<h1 id="images-title">Galeria de imagenes publicadas</h1>
+				</div>
+				<div class="resource-summary" aria-label="Resumen de imagenes">
+					<strong id="imageCount">0</strong>
+					<span>imagenes publicadas</span>
+				</div>
+			</section>
+
+			<section class="gallery-tools" aria-label="Busqueda de imagenes">
+				<label class="resource-search">
+					<span>Buscar por numero</span>
+					<input id="imageSearch" type="search" inputmode="numeric" placeholder="Ej. 001, 24, PANO-03">
+				</label>
+				<div id="galleryReadout" class="gallery-readout" aria-live="polite">0 resultados</div>
+			</section>
+
+			<section class="resource-section" aria-labelledby="panoramic-title">
+				<div class="section-heading">
+					<div>
+						<h2 id="panoramic-title">Imagenes panoramicas</h2>
+						<p id="panoramicCount">0 imagenes</p>
+					</div>
+				</div>
+				<div id="panoramicGallery" class="gallery-grid" data-empty-label="No hay imagenes panoramicas publicadas." aria-live="polite"></div>
+			</section>
+
+			<section class="resource-section" aria-labelledby="drone-title">
+				<div class="section-heading">
+					<div>
+						<h2 id="drone-title">Imagenes vuelo drone</h2>
+						<p id="droneCount">0 imagenes</p>
+					</div>
+				</div>
+				<div id="droneGallery" class="gallery-grid" data-empty-label="No hay imagenes de vuelo drone publicadas." aria-live="polite"></div>
+			</section>
+		</main>
+
+		<footer class="footer">
+			<div class="footer-inner">
+				<span>JBC Topografia, Catastro y Avaluos</span>
+				<span>Tel/WhatsApp (+506) 8437-4681</span>
+			</div>
+		</footer>
+	</div>
+
+	<script src="project-ui.js"></script>
+	<script>
+		window.JBCProjectUI.initPublishedImageGallery({
+			manifestUrl: "resources/imagenes/manifest.json"
+		});
+	</script>
+</body>
+</html>

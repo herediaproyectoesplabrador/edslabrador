@@ -1,0 +1,49 @@
+newmtl Block_0_0_0
+Ka 1 1 1
+Kd 1 1 1
+d 1
+Ns 0
+illum 1
+map_Kd Block_0_0_0.jpg
+newmtl Block_0_0_1
+Ka 1 1 1
+Kd 1 1 1
+d 1
+Ns 0
+illum 1
+map_Kd Block_0_0_1.jpg
+newmtl Block_0_0_2
+Ka 1 1 1
+Kd 1 1 1
+d 1
+Ns 0
+illum 1
+map_Kd Block_0_0_2.jpg
+newmtl Block_0_0_3
+Ka 1 1 1
+Kd 1 1 1
+d 1
+Ns 0
+illum 1
+map_Kd Block_0_0_3.jpg
+newmtl Block_0_0_4
+Ka 1 1 1
+Kd 1 1 1
+d 1
+Ns 0
+illum 1
+map_Kd Block_0_0_4.jpg
+newmtl Block_0_0_5
+Ka 1 1 1
+Kd 1 1 1
+d 1
+Ns 0
+illum 1
+map_Kd Block_0_0_5.jpg
+newmtl Block_0_1_0
+Ka 1 1 1
+Kd 1 1 1
+d 1
+Ns 0
+illum 1
+map_Kd Block_0_1_0.jpg

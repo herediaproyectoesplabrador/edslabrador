@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Ortofoto | Estación de Servicio Labrador</title>
+	<link rel="stylesheet" href="styles.css">
+</head>
+<body class="raster-page">
+	<header class="project-navbar">
+		<a class="project-brand" href="index.html" aria-label="JBC Topografía">
+			<img src="assets/logo-jbc.jpg" alt="JBC Topografía">
+			<span>JBC Topografía</span>
+		</a>
+		<div class="project-title" aria-label="Proyecto">
+			<span>Proyecto:</span>
+			<span>Estación de Servicio Labrador</span>
+		</div>
+			<nav class="project-nav" aria-label="Visualizaciones">
+				<a href="index.html">Inicio</a>
+				<a href="viewer-3d.html">Visor 3D</a>
+				<a href="dom.html" aria-current="page">Ortofoto</a>
+				<a href="dsm.html">MDS</a>
+				<a href="documentos.html">Documentos</a>
+				<a href="imagenes.html">Imagenes</a>
+			</nav>
+	</header>
+
+	<main class="raster-stage">
+		<div id="rasterViewport" class="raster-viewport">
+			<img id="rasterImage" src="assets/dom.png" alt="Ortofoto del proyecto Estación de Servicio Labrador" draggable="false">
+		</div>
+
+		<div class="raster-toolbar" aria-label="Zoom">
+			<button class="zoom-button" type="button" data-zoom-command="out" aria-label="Alejar">&minus;</button>
+			<div class="zoom-control">
+				<input id="zoomSlider" type="range" min="5" max="800" value="100" aria-label="Nivel de zoom">
+				<output id="zoomValue" for="zoomSlider">100%</output>
+			</div>
+			<button class="zoom-button" type="button" data-zoom-command="in" aria-label="Acercar">+</button>
+			<button class="zoom-button" type="button" data-zoom-command="reset">Ajustar</button>
+		</div>
+	</main>
+
+	<script src="project-ui.js"></script>
+	<script>
+		window.JBCProjectUI.initRasterViewer();
+	</script>
+</body>
+</html>

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Visor 3D | Estación de Servicio Labrador</title>
+
+	<link rel="stylesheet" type="text/css" href="../../build/potree/potree.css">
+	<link rel="stylesheet" type="text/css" href="../../libs/jquery-ui/jquery-ui.min.css">
+	<link rel="stylesheet" type="text/css" href="../../libs/openlayers3/ol.css">
+	<link rel="stylesheet" type="text/css" href="../../libs/spectrum/spectrum.css">
+	<link rel="stylesheet" type="text/css" href="../../libs/jstree/themes/mixed/style.css">
+	<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="viewer-3d-page">
+	<script src="../../libs/jquery/jquery-3.1.1.min.js"></script>
+	<script src="../../libs/spectrum/spectrum.js"></script>
+	<script src="../../libs/jquery-ui/jquery-ui.min.js"></script>
+	<script src="../../libs/other/BinaryHeap.js"></script>
+	<script src="../../libs/tween/tween.min.js"></script>
+	<script src="../../libs/d3/d3.js"></script>
+	<script src="../../libs/proj4/proj4.js"></script>
+	<script src="../../libs/openlayers3/ol.js"></script>
+	<script src="../../libs/i18next/i18next.js"></script>
+	<script src="../../libs/jstree/jstree.js"></script>
+	<script src="../../build/potree/potree.js"></script>
+	<script src="../../libs/plasio/js/laslaz.js"></script>
+
+	<header class="project-navbar">
+		<a class="project-brand" href="index.html" aria-label="JBC Topografía">
+			<img src="assets/logo-jbc.jpg" alt="JBC Topografía">
+			<span>JBC Topografía</span>
+		</a>
+		<div class="project-title" aria-label="Proyecto">
+			<span>Proyecto:</span>
+			<span>Estación de Servicio Labrador</span>
+		</div>
+			<nav class="project-nav" aria-label="Visualizaciones">
+				<a href="index.html">Inicio</a>
+				<a href="viewer-3d.html" aria-current="page">Visor 3D</a>
+				<a href="dom.html">Ortofoto</a>
+				<a href="dsm.html">MDS</a>
+				<a href="documentos.html">Documentos</a>
+				<a href="imagenes.html">Imagenes</a>
+			</nav>
+	</header>
+
+	<div class="potree_container jbc-potree-container">
+		<div id="potree_render_area" style="background-image: url('../../build/potree/resources/images/background.jpg');"></div>
+		<div id="potree_sidebar_container" aria-hidden="true"></div>
+	</div>
+
+	<aside class="jbc-layer-panel" aria-label="Capas del visor 3D">
+		<p class="layer-panel-title">Capas visibles</p>
+		<label class="layer-toggle">
+			<input id="togglePointcloudLayer" type="checkbox" checked disabled>
+			<span class="layer-toggle-label">
+				<strong>Nube de puntos</strong>
+				<span class="layer-status-row">
+					<span class="layer-loader" aria-hidden="true"></span>
+					<span id="pointcloudLayerStatus" class="layer-status-text">Cargando...</span>
+				</span>
+			</span>
+		</label>
+		<label class="layer-toggle">
+			<input id="toggleTexturedModelLayer" type="checkbox">
+			<span class="layer-toggle-label">
+				<strong>Modelo texturizado</strong>
+				<span class="layer-status-row">
+					<span class="layer-loader" aria-hidden="true"></span>
+					<span id="texturedModelStatus" class="layer-status-text">Inactivo</span>
+				</span>
+			</span>
+		</label>
+	</aside>
+
+	<script src="project-ui.js"></script>
+	<script type="module">
+		import * as THREE from "../../libs/three.js/build/three.module.js";
+		import {OBJLoader} from "../../libs/three.js/loaders/OBJLoader.js";
+		import {installTexturedModelPicking} from "./project-measurement-adapter.js";
+		import {installProjectLighting} from "./project-lighting.js";
+
+		window.viewer = new Potree.Viewer(document.getElementById("potree_render_area"));
+		const potreeDescription = document.getElementById("potree_description");
+		if (potreeDescription) {
+			potreeDescription.remove();
+		}
+
+		viewer.setEDLEnabled(false);
+		viewer.setFOV(60);
+		viewer.setPointBudget(4_000_000);
+		viewer.setMinNodeSize(6);
+		viewer.loadSettingsFromURL();
+		viewer.setBackground("gradient");
+		installTexturedModelPicking({viewer, THREE});
+
+		function resizePotreeRenderArea() {
+			const width = viewer.renderArea.clientWidth;
+			const height = viewer.renderArea.clientHeight;
+			if (width <= 0 || height <= 0) return;
+
+			viewer.renderer.setSize(width, height);
+			viewer.scene.cameraP.aspect = width / height;
+			viewer.scene.cameraP.updateProjectionMatrix();
+		}
+
+		window.addEventListener("resize", resizePotreeRenderArea);
+		viewer.loadGUI(() => {
+			viewer.setLanguage("en");
+			$("#menu_scene").next().show();
+			$("#menu_tools").next().show();
+			$("#menu_clipping").next().show();
+			viewer.toggleSidebar();
+			[80, 420, 900].forEach(delay => setTimeout(resizePotreeRenderArea, delay));
+		});
+
+		const layerControls = {
+			pointcloudInput: document.getElementById("togglePointcloudLayer"),
+			pointcloudStatus: document.getElementById("pointcloudLayerStatus"),
+			texturedInput: document.getElementById("toggleTexturedModelLayer"),
+			texturedStatus: document.getElementById("texturedModelStatus")
+		};
+		layerControls.pointcloudToggle = layerControls.pointcloudInput.closest(".layer-toggle");
+		layerControls.texturedToggle = layerControls.texturedInput.closest(".layer-toggle");
+
+		const texturedModel = new THREE.Group();
+		texturedModel.name = "Modelo texturizado";
+		texturedModel.position.set(492909.94972536614, 1106608.4589448222, 0.000000000703446);
+		texturedModel.visible = false;
+		viewer.scene.scene.add(texturedModel);
+
+		const loadedTexturedBlocks = new Set();
+		let pointcloudLoading = true;
+		let pointcloudErrors = 0;
+		let texturedModelLoading = false;
+		let texturedModelErrors = 0;
+		let texturedModelLoadStarted = false;
+
+		installProjectLighting({viewer, THREE});
+
+		const pointclouds = [
+			{
+				name: "Block 0",
+				url: "../../pointclouds/jbc/estacion-servicio-labrador/block_0/metadata.json"
+			},
+			{
+				name: "Block 1",
+				url: "../../pointclouds/jbc/estacion-servicio-labrador/block_1/metadata.json"
+			}
+		];
+
+		const texturedBlocks = ["Block_0", "Block_1"];
+
+		function formatCount(count, singular, plural) {
+			return `${count} ${count === 1 ? singular : plural}`;
+		}
+
+		function setPointcloudsVisible(visible) {
+			for (const pointcloud of viewer.scene.pointclouds) {
+				pointcloud.visible = visible;
+			}
+			updatePointcloudControls();
+		}
+
+		function setLayerLoading(toggle, loading) {
+			toggle.classList.toggle("is-loading", loading);
+			toggle.setAttribute("aria-busy", String(loading));
+		}
+
+		function updatePointcloudControls(message = null) {
+			const loaded = viewer.scene.pointclouds.length;
+			setLayerLoading(layerControls.pointcloudToggle, pointcloudLoading);
+			layerControls.pointcloudInput.disabled = loaded === 0;
+			layerControls.pointcloudInput.checked = loaded === 0
+				? layerControls.pointcloudInput.checked
+				: viewer.scene.pointclouds.every(pointcloud => pointcloud.visible);
+
+			if (message) {
+				layerControls.pointcloudStatus.textContent = message;
+				return;
+			}
+
+			if (pointcloudLoading) {
+				layerControls.pointcloudStatus.textContent = `Cargando ${loaded}/${pointclouds.length}`;
+				return;
+			}
+
+			if (loaded === 0) {
+				layerControls.pointcloudStatus.textContent = "No disponible";
+				return;
+			}
+
+			const state = layerControls.pointcloudInput.checked ? "Activa" : "Oculta";
+			const suffix = pointcloudErrors > 0 ? " con avisos" : "";
+			layerControls.pointcloudStatus.textContent = `${state}: ${formatCount(loaded, "bloque", "bloques")}${suffix}`;
+		}
+
+		function setTexturedModelVisible(visible) {
+			texturedModel.visible = visible;
+			updateTexturedModelControls();
+		}
+
+		function updateTexturedModelControls(message = null) {
+			const loaded = loadedTexturedBlocks.size;
+			setLayerLoading(layerControls.texturedToggle, texturedModelLoading);
+			layerControls.texturedInput.checked = texturedModel.visible;
+
+			if (message) {
+				layerControls.texturedStatus.textContent = message;
+				return;
+			}
+
+			if (texturedModelLoading) {
+				layerControls.texturedStatus.textContent = `Cargando ${loaded}/${texturedBlocks.length}`;
+				return;
+			}
+
+			if (!texturedModelLoadStarted) {
+				layerControls.texturedStatus.textContent = "Inactivo";
+				return;
+			}
+
+			if (loaded === 0) {
+				layerControls.texturedStatus.textContent = "No disponible";
+				return;
+			}
+
+			const state = texturedModel.visible ? "Activo" : "Oculto";
+			const suffix = texturedModelErrors > 0 ? " con avisos" : "";
+			layerControls.texturedStatus.textContent = `${state}: ${formatCount(loaded, "bloque", "bloques")}${suffix}`;
+		}
+
+		function wireLayerControls() {
+			layerControls.pointcloudInput.addEventListener("change", () => {
+				setPointcloudsVisible(layerControls.pointcloudInput.checked);
+			});
+
+			layerControls.texturedInput.addEventListener("change", () => {
+				if (layerControls.texturedInput.checked) {
+					setTexturedModelVisible(true);
+					if (!texturedModelLoading && loadedTexturedBlocks.size < texturedBlocks.length) {
+						loadTexturedModel();
+					}
+				} else {
+					setTexturedModelVisible(false);
+				}
+			});
+
+			updatePointcloudControls();
+			updateTexturedModelControls();
+		}
+
+		async function loadPointclouds() {
+			for (const item of pointclouds) {
+				try {
+					const result = await Potree.loadPointCloud(item.url, item.name);
+					const pointcloud = result.pointcloud;
+					pointcloud.name = item.name;
+
+					const material = pointcloud.material;
+					material.size = 1.5;
+					material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
+					material.shape = Potree.PointShape.SQUARE;
+					material.activeAttributeName = "rgba";
+
+					viewer.scene.addPointCloud(pointcloud);
+					updatePointcloudControls();
+				} catch (error) {
+					pointcloudErrors += 1;
+					console.error(error);
+					updatePointcloudControls(`No se pudo cargar ${item.name}`);
+				}
+			}
+
+			pointcloudLoading = false;
+			updatePointcloudControls();
+
+			viewer.scene.view.setView(
+				[493020.0, 1106410.0, 1385.0],
+				[492891.7, 1106571.6, 1306.2]
+			);
+			setTimeout(() => viewer.fitToScreen(), 1500);
+		}
+
+		async function loadMtlTextures(baseUrl, fileName) {
+			const response = await fetch(`${baseUrl}${fileName}`);
+			const text = await response.text();
+			const textures = new Map();
+			let currentMaterial = null;
+
+			for (const rawLine of text.split(/\r?\n/)) {
+				const line = rawLine.trim();
+				if (!line || line.startsWith("#")) continue;
+
+				if (line.startsWith("newmtl ")) {
+					currentMaterial = line.slice(7).trim();
+				}
+
+				if (currentMaterial && line.startsWith("map_Kd ")) {
+					textures.set(currentMaterial, line.slice(7).trim());
+				}
+			}
+
+			return textures;
+		}
+
+		function applyTextures(object, baseUrl, textureNames) {
+			const loader = new THREE.TextureLoader();
+			const cache = new Map();
+
+			function getTexture(fileName) {
+				if (!cache.has(fileName)) {
+					const texture = loader.load(`${baseUrl}${fileName}`);
+					if ("encoding" in texture && "sRGBEncoding" in THREE) {
+						texture.encoding = THREE.sRGBEncoding;
+					}
+					texture.wrapS = THREE.ClampToEdgeWrapping;
+					texture.wrapT = THREE.ClampToEdgeWrapping;
+					cache.set(fileName, texture);
+				}
+
+				return cache.get(fileName);
+			}
+
+			function applyMaterial(material) {
+				const fileName = textureNames.get(material.name);
+				if (!fileName) return;
+
+				material.map = getTexture(fileName);
+				material.color.set(0xffffff);
+				material.side = THREE.DoubleSide;
+				material.needsUpdate = true;
+			}
+
+			object.traverse(child => {
+				if (!child.isMesh) return;
+
+				child.frustumCulled = false;
+				child.castShadow = false;
+				child.receiveShadow = true;
+
+				if (Array.isArray(child.material)) {
+					child.material.forEach(applyMaterial);
+				} else {
+					applyMaterial(child.material);
+				}
+			});
+		}
+
+		function loadObj(baseUrl, objName) {
+			return new Promise((resolve, reject) => {
+				const loader = new OBJLoader();
+				loader.setPath(baseUrl);
+				loader.load(objName, resolve, undefined, reject);
+			});
+		}
+
+		async function loadTexturedBlock(name) {
+			if (loadedTexturedBlocks.has(name)) {
+				return texturedModel.getObjectByName(`${name} texturizado`);
+			}
+
+			const baseUrl = `../../models/jbc/estacion-servicio-labrador/obj/${name}/`;
+			const textureNames = await loadMtlTextures(baseUrl, `${name}.mtl`);
+			const object = await loadObj(baseUrl, `${name}.obj`);
+			object.name = `${name} texturizado`;
+			applyTextures(object, baseUrl, textureNames);
+			texturedModel.add(object);
+			loadedTexturedBlocks.add(name);
+			updateTexturedModelControls();
+			return object;
+		}
+
+		async function loadTexturedModel() {
+			texturedModelLoadStarted = true;
+			texturedModelLoading = true;
+			texturedModelErrors = 0;
+			updateTexturedModelControls();
+
+			const results = await Promise.allSettled(texturedBlocks.map(loadTexturedBlock));
+			texturedModelErrors = results.filter(result => result.status === "rejected").length;
+			for (const result of results) {
+				if (result.status === "rejected") {
+					console.error(result.reason);
+				}
+			}
+
+			texturedModelLoading = false;
+			if (loadedTexturedBlocks.size === 0) {
+				texturedModel.visible = false;
+			}
+			updateTexturedModelControls();
+
+			if (loadedTexturedBlocks.size > 0) {
+				setTimeout(() => viewer.fitToScreen(), 800);
+			}
+		}
+
+		wireLayerControls();
+		loadPointclouds();
+	</script>
+</body>
+</html>

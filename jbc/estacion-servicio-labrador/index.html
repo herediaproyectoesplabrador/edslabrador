@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Estación de Servicio Labrador | JBC Topografía</title>
+	<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+	<div class="site-shell">
+		<header class="project-navbar">
+			<a class="project-brand" href="index.html" aria-label="JBC Topografía">
+				<img src="assets/logo-jbc.jpg" alt="JBC Topografía">
+				<span>JBC Topografía</span>
+			</a>
+			<div class="project-title" aria-label="Proyecto">
+				<span>Proyecto:</span>
+				<span>Estación de Servicio Labrador</span>
+			</div>
+			<nav class="project-nav" aria-label="Visualizaciones">
+				<a href="index.html" aria-current="page">Inicio</a>
+				<a href="viewer-3d.html">Visor 3D</a>
+				<a href="dom.html">Ortofoto</a>
+				<a href="dsm.html">MDS</a>
+				<a href="documentos.html">Documentos</a>
+				<a href="imagenes.html">Imagenes</a>
+			</nav>
+		</header>
+
+		<main class="landing-main">
+			<section class="hero" aria-labelledby="project-title">
+				<div>
+					<p class="eyebrow">Nube de puntos, modelo texturizado, ortofoto y superficie</p>
+					<h1 id="project-title">Visualización web para revisión topográfica y fotogramétrica.</h1>
+					<p>El visor 3D concentra la nube de puntos y el modelo texturizado en una sola escena. Las capas 2D quedan separadas para consultar la ortofoto y el modelo digital de superficie con navegación fluida.</p>
+				</div>
+				<div class="hero-meta" aria-label="Resumen del proyecto">
+					<div class="metric">
+						<strong>6.94 M</strong>
+						<span>Puntos RGB</span>
+					</div>
+					<div class="metric">
+						<strong>2</strong>
+						<span>Bloques 3D</span>
+					</div>
+					<div class="metric">
+						<strong>DOM / MDS</strong>
+						<span>Capas 2D</span>
+					</div>
+				</div>
+			</section>
+
+			<section class="launch-grid" aria-label="Vistas disponibles">
+				<a class="launch-card" href="viewer-3d.html">
+					<div class="card-media">
+						<div class="point-cloud-preview" aria-hidden="true"></div>
+					</div>
+					<div class="card-body">
+						<h2>Visor 3D</h2>
+						<p>Escena Potree con nube de puntos y modelo texturizado controlados desde un panel de capas contextual.</p>
+					</div>
+					<span class="card-action primary">Abrir visor 3D</span>
+				</a>
+
+				<a class="launch-card" href="dom.html">
+					<div class="card-media">
+						<img src="assets/dom.png" alt="Vista previa de ortofoto">
+					</div>
+					<div class="card-body">
+						<h2>Ortofoto</h2>
+						<p>Imagen ortorrectificada del proyecto para lectura planimétrica y contexto visual del sitio.</p>
+					</div>
+					<span class="card-action">Abrir ortofoto</span>
+				</a>
+
+				<a class="launch-card" href="dsm.html">
+					<div class="card-media">
+						<img src="assets/dsm.png" alt="Vista previa de modelo digital de superficie">
+					</div>
+					<div class="card-body">
+						<h2>MDS</h2>
+						<p>Modelo digital de superficie para revisar variación altimétrica y continuidad de la reconstrucción.</p>
+					</div>
+					<span class="card-action">Abrir MDS</span>
+				</a>
+
+				<a class="launch-card" href="documentos.html">
+					<div class="card-media document-preview" aria-hidden="true">
+						<span>PDF</span>
+					</div>
+					<div class="card-body">
+						<h2>Documentos</h2>
+						<p>Reporte de calidad del resultado fotogrametrico y documentos tecnicos asociados al proyecto.</p>
+					</div>
+					<span class="card-action">Abrir documentos</span>
+				</a>
+
+				<a class="launch-card" href="imagenes.html">
+					<div class="card-media gallery-preview">
+						<img src="assets/dom.png" alt="Vista previa de galeria de imagenes">
+					</div>
+					<div class="card-body">
+						<h2>Imagenes</h2>
+						<p>Galeria agrupada por imagenes panoramicas e imagenes de vuelo drone con busqueda por numero.</p>
+					</div>
+					<span class="card-action">Abrir imagenes</span>
+				</a>
+			</section>
+		</main>
+
+		<footer class="footer">
+			<div class="footer-inner">
+				<span>JBC Topografía, Catastro y Avalúos</span>
+				<span>Tel/WhatsApp (+506) 8437-4681</span>
+			</div>
+		</footer>
+	</div>
+	<script src="project-ui.js"></script>
+</body>
+</html>
