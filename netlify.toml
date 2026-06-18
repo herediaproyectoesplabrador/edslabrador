@@ -1,0 +1,14 @@
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "/"
+  to = "/jbc/estacion-servicio-labrador/"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/labrador"
+  to = "/jbc/estacion-servicio-labrador/"
+  status = 302
+  force = true
